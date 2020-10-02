@@ -1,30 +1,47 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect} from "react"
 
-
-
-const Context = React.createContext();
+const Context = React.createContext()
 
 function ContextProvider({children}) {
-	const [allPhotos, setAllPhotos] = useState([])
+    const [allPhotos, setAllPhotos] = useState([]);
+    const [cartItems, setCartItems] = useState([]);
+    
+    const url = "https://raw.githubusercontent.com/bobziroll/scrimba-react-bootcamp-images/master/images.json"
+    useEffect(() => {
+        fetch(url)
+            .then(res => res.json())
+            .then(data => setAllPhotos(data))
+    }, [])
+    
+    function toggleFavorite(id) {
+        const updatedArr = allPhotos.map(photo => {
+            if(photo.id === id) {
+            	return {...photo, isFavorite: !photo.isFavorite}
+            }
+            return photo
+        })
+        
+        setAllPhotos(updatedArr)
+    }
 
-	const url = "https://raw.githubusercontent.com/bobziroll/scrimba-react-bootcamp-images/master/images.json"
+    function addCart(obj) {
+    	setCartItems(item=> [...item, obj]);
+    }
 
-	useEffect(() => {
-		//get the data from api;
-		fetch(url)
-			.then(item => item.json())
-			.then(data => setAllPhotos(data))
-		}, [])
+    function emptyCart() {
+    	setCartItems([]);
+    }
+    
+    function deleteItem(obj) {
+    	const newCartItems = cartItems.filter(item=> item !== obj);
+    	setCartItems(prev => prev = newCartItems)
+    }
 
-	 
-
-	console.log(allPhotos)
-
-	return (
-		<Context.Provider value = {{allPhotos}}>
-			{children}
-		</Context.Provider>
-	)
+    return (
+        <Context.Provider value={{allPhotos, toggleFavorite, addCart, cartItems, setCartItems, deleteItem, emptyCart}}>
+            {children}
+        </Context.Provider>
+    )
 }
 
-export {ContextProvider, Context};
+export {ContextProvider, Context}
